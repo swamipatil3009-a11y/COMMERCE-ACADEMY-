@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commerce Academy</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f5fa;color:#17233e}
+header{background:#101e3b;color:white;padding:25px 20px}
+header h1{margin:0;color:#e8c777;letter-spacing:1px}
+header p{color:#cbd5e1;margin-bottom:0}
+main{max-width:950px;margin:auto;padding:20px}
+.card{background:white;padding:20px;border-radius:14px;margin-bottom:17px;box-shadow:0 3px 15px #14213d10}
+h2{font-size:20px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.stat{background:#172b50;color:white;padding:17px;border-radius:12px}
+.stat strong{display:block;font-size:25px;color:#e8c777;margin-top:8px}
+button,select{padding:12px;border-radius:8px;border:1px solid #d7dce5;font-size:15px}
+button{background:#172b50;color:white;border:0;cursor:pointer;margin:5px 3px}
+button:hover{background:#263f6b}
+select{width:100%;margin:7px 0 14px;background:white}
+.subjects{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.subject{padding:17px;background:#f0f3f9;border-radius:10px;text-align:center;font-weight:bold}
+.question{font-size:18px;font-weight:bold;margin:20px 0}
+.option{display:block;background:#f1f4f9;color:#17233e;text-align:left;width:100%;margin:9px 0}
+.option.selected{background:#dce7fa;border:2px solid #294b83}
+textarea{width:100%;min-height:110px;padding:12px;border:1px solid #ccd3df;border-radius:8px;font:15px Arial}
+.hidden{display:none}
+.small{color:#68758a;font-size:13px}
+footer{text-align:center;color:#718096;padding:25px}
+@media(max-width:500px){.stats{grid-template-columns:1fr 1fr}.subjects{grid-template-columns:1fr 1fr}main{padding:12px}}
+</style>
+</head>
+<body>
+<header>
+<h1>COMMERCE ACADEMY</h1>
+<p>Your Personal Examination Portal</p>
+<p class="small">LEARN • PRACTICE • EVALUATE • IMPROVE</p>
+</header>
+
+<main>
+<section id="home">
+<div class="card">
+<h2>Welcome to your study dashboard!</h2>
+<p>Prepare, practise and track your Class 11 Commerce progress.</p>
+<div class="stats">
+<div class="stat">Tests Completed<strong id="total">0</strong></div>
+<div class="stat">Average Score<strong id="average">0%</strong></div>
+</div>
+</div>
+
+<div class="card">
+<h2>Choose Your Subject</h2>
+<div class="subjects">
+<div class="subject">📒 Accountancy</div>
+<div class="subject">📊 Business Studies</div>
+<div class="subject">📈 Economics</div>
+<div class="subject">🔢 Mathematics</div>
+<div class="subject">📖 English</div>
+</div>
+</div>
+
+<div class="card">
+<h2>Create a New Test</h2>
+<label>Subject</label>
+<select id="subject">
+<option>Accountancy</option>
+<option>Business Studies</option>
+<option>Economics</option>
+<option>Mathematics</option>
+<option>English</option>
+</select>
+<label>Test Type</label>
+<select id="type">
+<option value="mcq">MCQ Test</option>
+<option value="subjective">Subjective Test</option>
+</select>
+<label>Number of questions</label>
+<select id="count">
+<option>5</option><option>10</option>
+</select>
+<button onclick="startTest()">Start Test →</button>
+<p class="small">Sample questions are provided in this first version. AI generation will be connected in a later step.</p>
+</div>
+
+<div class="card">
+<h2>Recent Test History</h2>
+<div id="history">No tests attempted yet.</div>
+</div>
+</section>
+
+<section id="exam" class="card hidden">
+<h2 id="examTitle">Your Test</h2>
+<p id="progress" class="small"></p>
+<div id="questionArea"></div>
+<button onclick="nextQuestion()" id="next">Next Question →</button>
+<button onclick="finishTest()" id="finish" class="hidden">Submit Test</button>
+</section>
+
+<section id="result" class="card hidden">
+<h2>Test Submitted!</h2>
+<h1 id="score" style="color:#b38a32"></h1>
+<p id="resultText"></p>
+<div id="review"></div>
+<button onclick="goHome()">Return to Dashboard</button>
+</section>
+</main>
+<footer>COMMERCE ACADEMY • PERSONAL STUDY PORTAL</footer>
+
+<script>
+const bank = {
+Accountancy:[
+{q:"Which of the following is an asset?",o:["Capital","Cash","Creditors","Drawings"],a:1},
+{q:"Accounting records are primarily maintained to:",o:["Calculate tax only","Record financial transactions","Advertise products","Recruit employees"],a:1},
+{q:"The owner’s claim in a business is called:",o:["Liability","Expense","Capital","Revenue"],a:2},
+{q:"Which account is related to a person?",o:["Personal account","Real account","Nominal account","Trading account"],a:0},
+{q:"A purchase of goods for cash affects:",o:["Cash and purchases","Capital only","Sales only","Creditors only"],a:0}
+],
+"Business Studies":[
+{q:"Business is primarily an:",o:["Economic activity","Political activity","Social hobby","Leisure activity"],a:0},
+{q:"Which activity involves buying and selling goods?",o:["Manufacturing","Trade","Banking","Insurance"],a:1},
+{q:"Profession generally requires:",o:["Specialised knowledge","No training","No skills","Only physical labour"],a:0},
+{q:"The main objective of business is generally:",o:["Charity only","Earning profit","Entertainment","Avoiding customers"],a:1},
+{q:"Which is an auxiliary to trade?",o:["Mining","Manufacturing","Banking","Farming"],a:2}
+],
+Economics:[
+{q:"Economics studies the allocation of:",o:["Unlimited resources","Scarce resources","Only money","Only machines"],a:1},
+{q:"The central problem of an economy arises due to:",o:["Scarcity","Abundance","No wants","No resources"],a:0},
+{q:"Demand generally means desire backed by:",o:["Advertising","Ability and willingness to pay","Production","Savings only"],a:1},
+{q:"Which is a factor of production?",o:["Land","Price","Demand","Tax"],a:0},
+{q:"Opportunity cost is the:",o:["Total profit","Next best alternative forgone","Selling price","Fixed cost"],a:1}
+],
+Mathematics:[
+{q:"What is 12 × 8?",o:["86","96","108","88"],a:1},
+{q:"What is the square of 9?",o:["18","72","81","99"],a:2},
+{q:"The value of 2³ is:",o:["6","8","9","12"],a:1},
+{q:"What is 25% of 200?",o:["25","40","50","75"],a:2},
+{q:"The median of 2, 4, 6 is:",o:["2","4","6","12"],a:1}
+],
+English:[
+{q:"Choose the correct plural of 'child'.",o:["Childs","Childes","Children","Childrens"],a:2},
+{q:"Which is a noun?",o:["Quickly","Beautiful","Honesty","Run"],a:2},
+{q:"Choose the correct article: ___ apple.",o:["A","An","The only","No article"],a:1},
+{q:"Past tense of 'go' is:",o:["Goed","Gone","Went","Going"],a:2},
+{q:"A synonym of 'happy' is:",o:["Sad","Joyful","Angry","Tired"],a:1}
+]
+};
+
+let questions=[], index=0, answers=[], currentSubject="", currentType="";
+
+function startTest(){
+currentSubject=document.getElementById("subject").value;
+currentType=document.getElementById("type").value;
+let count=Number(document.getElementById("count").value);
+questions=bank[currentSubject].slice(0,count);
+index=0;answers=[];
+document.getElementById("home").classList.add("hidden");
+document.getElementById("result").classList.add("hidden");
+document.getElementById("exam").classList.remove("hidden");
+document.getElementById("examTitle").textContent=currentSubject+" Test";
+if(currentType==="subjective"){
+questions=questions.slice(0,3).map(q=>({q:q.q,answer:"Write your own answer"}));
+}
+showQuestion();
+}
+
+function showQuestion(){
+let q=questions[index];
+document.getElementById("progress").textContent="Question "+(index+1)+" of "+questions.length;
+let area=document.getElementById("questionArea");
+if(currentType==="mcq"){
+area.innerHTML="<div class='question'></div>";
+area.querySelector(".question").textContent=q.q;
+q.o.forEach((option,i)=>{
+let b=document.createElement("button");
+b.className="option";
+b.textContent=String.fromCharCode(65+i)+". "+option;
+if(answers[index]===i)b.classList.add("selected");
+b.onclick=()=>{answers[index]=i;showQuestion()};
+area.appendChild(b);
+});
+}else{
+area.innerHTML="";
+let heading=document.createElement("div");
+heading.className="question";
+heading.textContent=q.q;
+let input=document.createElement("textarea");
+input.placeholder="Write your answer here...";
+input.value=answers[index]||"";
+input.oninput=()=>answers[index]=input.value;
+area.append(heading,input);
+}
+document.getElementById("next").classList.toggle("hidden",index===questions.length-1);
+document.getElementById("finish").classList.toggle("hidden",index!==questions.length-1);
+}
+
+function nextQuestion(){if(index<questions.length-1){index++;showQuestion()}}
+
+function finishTest(){
+let correct=0;
+if(currentType==="mcq"){
+questions.forEach((q,i)=>{if(answers[i]===q.a)correct++});
+}else{
+correct=0;
+}
+let percentage=currentType==="mcq"?Math.round(correct/questions.length*100):0;
+let record={subject:currentSubject,type:currentType,score:correct,total:questions.length,percentage,date:new Date().toLocaleDateString()};
+let history=JSON.parse(localStorage.getItem("commerceHistory")||"[]");
+history.unshift(record);
+localStorage.setItem("commerceHistory",JSON.stringify(history));
+document.getElementById("exam").classList.add("hidden");
+document.getElementById("result").classList.remove("hidden");
+document.getElementById("score").textContent=currentType==="mcq"?correct+" / "+questions.length+" ("+percentage+"%)":"Answers submitted";
+document.getElementById("resultText").textContent=currentType==="mcq"?"Your MCQ test has been automatically evaluated.":"Subjective answers are saved only for this session in this first version. Manual marking will be added later.";
+document.getElementById("review").textContent=currentType==="mcq"?"Correct answers: "+correct+" | Incorrect or unanswered: "+(questions.length-correct):"";
+updateDashboard();
+}
+
+function updateDashboard(){
+let h=JSON.parse(localStorage.getItem("commerceHistory")||"[]");
+document.getElementById("total").textContent=h.length;
+let avg=h.length?Math.round(h.reduce((s,x)=>s+x.percentage,0)/h.length):0;
+document.getElementById("average").textContent=avg+"%";
+document.getElementById("history").innerHTML=h.length?h.slice(0,8).map(x=>"<p>"+x.date+" — "+x.subject+" — "+x.type.toUpperCase()+" — "+x.percentage+"%</p>").join(""):"No tests attempted yet.";
+}
+function goHome(){
+document.getElementById("result").classList.add("hidden");
+document.getElementById("home").classList.remove("hidden");
+updateDashboard();
+}
+updateDashboard();
+</script>
+</body>
+</html>
