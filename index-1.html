@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Commerce Academy</title>
+<style>
+:root{--navy:#14243b;--gold:#d9b56d;--bg:#f4f6fa;--ink:#172235;--muted:#68758a;--line:#e1e6ee;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+header{background:var(--navy);color:white;padding:22px 18px 18px}header .tag{color:var(--gold);font-size:11px;letter-spacing:2px;font-weight:700}h1{font-size:23px;margin:7px 0}header p{margin:0;color:#d4dbe5;font-size:13px}
+main{max-width:850px;margin:auto;padding:16px}.deadline{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:14px;display:flex;justify-content:space-between;gap:12px;align-items:center}.deadline strong{font-size:19px;color:var(--navy)}.muted{color:var(--muted);font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}.stat,.panel,.subject{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}.stat b{display:block;font-size:22px;color:var(--navy)}.stat span{font-size:12px;color:var(--muted)}
+nav{display:flex;gap:7px;overflow:auto;padding:2px 0 12px}nav button{white-space:nowrap;border:1px solid var(--line);background:white;border-radius:999px;padding:9px 13px;color:var(--ink);font-weight:600}nav button.active{background:var(--navy);color:white;border-color:var(--navy)}
+h2{font-size:18px;margin:8px 0 12px}.subjects{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.subject{cursor:pointer;text-align:left}.subject b{display:block;font-size:15px}.subject small{color:var(--muted)}
+button{cursor:pointer} .primary{background:var(--navy);color:white;border:0;border-radius:10px;padding:11px 14px;font-weight:650}.secondary{background:white;border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-weight:600;color:var(--navy)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px}.lecture{border:1px solid var(--line);background:#fff;border-radius:12px;padding:13px;margin:9px 0}.lecture h3{font-size:15px;margin:0 0 5px}.pill{font-size:11px;border-radius:999px;padding:4px 8px;background:#fff2d7;color:#815b16}.pill.done{background:#e2f5e9;color:#17653a}
+input,select,textarea{width:100%;border:1px solid #cfd7e3;border-radius:9px;padding:11px;font:inherit;background:white;margin:5px 0 12px}label{font-size:12px;font-weight:700;color:#4e5c70} .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.empty{padding:22px;text-align:center;color:var(--muted);background:white;border:1px dashed #ccd4df;border-radius:12px}
+.hidden{display:none!important}.notice{background:#fff8e8;border:1px solid #f0dcae;color:#71551c;border-radius:10px;padding:11px;font-size:12px;margin:12px 0}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:24px}
+@media(max-width:500px){.subjects{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}.deadline{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header><div class="tag">YOUR PERSONAL LEARNING PORTAL</div><h1>COMMERCE ACADEMY</h1><p>Class 11 Commerce · Learn, practise, revise</p></header>
+<main>
+<section class="deadline"><div><div class="muted">FULL SYLLABUS + REVISION DEADLINE</div><strong>1 February 2027</strong></div><div id="daysLeft" class="muted"></div></section>
+<div class="stats">
+ <div class="stat"><b id="totalLectures">0</b><span>Lectures added</span></div>
+ <div class="stat"><b id="completedLectures">0</b><span>Lectures completed</span></div>
+ <div class="stat"><b id="pendingLectures">0</b><span>Pending lectures</span></div>
+ <div class="stat"><b id="backlogCount">0</b><span>Backlog lectures</span></div>
+</div>
+<nav>
+<button class="active" data-tab="home">Dashboard</button><button data-tab="library">Lecture library</button><button data-tab="add">Add lecture</button><button data-tab="backlog">Backlog</button><button data-tab="schedule">Schedule</button>
+</nav>
+<section id="home">
+ <h2>Your subjects</h2><div class="subjects">
+  <button class="subject" onclick="openSubject('Accountancy')"><b>Accountancy</b><small>Date-wise lectures</small></button>
+  <button class="subject" onclick="openSubject('OCM')"><b>OCM</b><small>Chapter-wise lectures</small></button>
+  <button class="subject" onclick="openSubject('Mathematics')"><b>Mathematics</b><small>Date-wise lectures</small></button>
+  <button class="subject" onclick="openSubject('Economics')"><b>Economics</b><small>Chapter-wise lectures</small></button>
+ </div>
+ <h2 style="margin-top:20px">Today's study rotation</h2><div class="panel" id="todayPlan"></div>
+ <div class="notice">Daily target: 2 video lectures for each subject scheduled that day. Add the videos you currently have; missing videos can be added later.</div>
+</section>
+<section id="library" class="hidden">
+ <div class="row"><h2>Lecture library</h2><button class="primary" onclick="showTab('add')">+ Add</button></div>
+ <label>Filter by subject</label><select id="filterSubject" onchange="renderLibrary()"><option value="All">All subjects</option><option>Accountancy</option><option>OCM</option><option>Mathematics</option><option>Economics</option></select>
+ <div id="lectureList"></div>
+</section>
+<section id="add" class="hidden">
+ <h2>Add a video lecture</h2><p class="muted">Add available lectures now and add more whenever new videos arrive.</p>
+ <form id="lectureForm">
+  <label>Subject</label><select id="subject" required><option>Accountancy</option><option>OCM</option><option>Mathematics</option><option>Economics</option></select>
+  <div id="chapterWrap" class="hidden"><label>Chapter</label><input id="chapter" placeholder="e.g. Chapter 1"></div>
+  <label>Video date / filename</label><input id="dateName" placeholder="e.g. 23-11-26" required>
+  <label>Topic (can be filled in later)</label><input id="topic" placeholder="Topic not identified yet">
+  <label>Google Drive video link</label><input id="videoLink" type="url" placeholder="https://drive.google.com/..." required>
+  <label>Scheduled date (optional)</label><input id="scheduledDate" type="date">
+  <button class="primary" type="submit">Save lecture</button>
+ </form>
+ <div class="notice">Privacy: lecture links are saved in this browser's local storage, not in this HTML file. Anyone using this same browser profile may still be able to see them. Do not add links if this device/browser is shared.</div>
+</section>
+<section id="backlog" class="hidden"><h2>Your backlog</h2><p class="muted">Uncompleted lectures whose scheduled date has passed.</p><div id="backlogList"></div></section>
+<section id="schedule" class="hidden">
+ <h2>Weekly subject rotation</h2>
+ <div class="panel">
+  <p><b>Monday:</b> Accountancy + OCM</p><p><b>Tuesday:</b> Mathematics + Economics</p><p><b>Wednesday:</b> Accountancy + Economics</p><p><b>Thursday:</b> OCM + Mathematics</p><p><b>Friday:</b> Accountancy + OCM</p><p><b>Saturday:</b> Mathematics + Economics</p><p><b>Sunday:</b> Accountancy + Mathematics</p>
+  <div class="notice">Target: 2 lectures per scheduled subject (about 20–25 minutes each). This is the rotation currently entered from our conversation.</div>
+ </div>
+</section>
+<footer>Commerce Academy · Progress is saved in this browser on this device.</footer>
+</main>
+<script>
+const KEY='commerceAcademyLecturesV1';
+let lectures=JSON.parse(localStorage.getItem(KEY)||'[]');
+const rotation={1:['Accountancy','OCM'],2:['Mathematics','Economics'],3:['Accountancy','Economics'],4:['OCM','Mathematics'],5:['Accountancy','OCM'],6:['Mathematics','Economics'],0:['Accountancy','Mathematics']};
+function save(){localStorage.setItem(KEY,JSON.stringify(lectures));refresh()}
+function showTab(tab){document.querySelectorAll('main>section').forEach(s=>s.classList.add('hidden'));document.getElementById(tab).classList.remove('hidden');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));if(tab==='library')renderLibrary();if(tab==='backlog')renderBacklog()}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+function openSubject(s){showTab('library');document.getElementById('filterSubject').value=s;renderLibrary()}
+function updateChapter(){document.getElementById('chapterWrap').classList.toggle('hidden',!['OCM','Economics'].includes(document.getElementById('subject').value))}
+document.getElementById('subject').addEventListener('change',updateChapter);updateChapter();
+document.getElementById('lectureForm').addEventListener('submit',e=>{e.preventDefault();const subject=document.getElementById('subject').value;const link=document.getElementById('videoLink').value.trim();if(!/^https:\/\/(drive\.google\.com|docs\.google\.com)\//i.test(link)){alert('Please enter a Google Drive link.');return}
+lectures.push({id:Date.now().toString(),subject,chapter:['OCM','Economics'].includes(subject)?document.getElementById('chapter').value.trim():'',dateName:document.getElementById('dateName').value.trim(),topic:document.getElementById('topic').value.trim()||'Topic pending',link,scheduledDate:document.getElementById('scheduledDate').value,done:false});save();e.target.reset();updateChapter();showTab('library');document.getElementById('filterSubject').value=subject;renderLibrary();});
+function makeCard(l){return `<article class="lecture"><div class="row"><h3>${esc(l.subject)} · ${esc(l.dateName)}</h3><span class="pill ${l.done?'done':''}">${l.done?'Completed':'Pending'}</span></div><div class="muted">${l.chapter?esc(l.chapter)+' · ':''}${esc(l.topic)}</div><div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="secondary" onclick="window.open('${safeUrl(l.link)}','_blank','noopener')">Watch video ↗</button><button class="secondary" onclick="toggleDone('${l.id}')">${l.done?'Mark pending':'Mark completed'}</button><button class="secondary" onclick="removeLecture('${l.id}')">Delete</button></div>${l.scheduledDate?`<div class="muted" style="margin-top:8px">Scheduled: ${esc(l.scheduledDate)}</div>`:''}</article>`}
+function renderLibrary(){const f=document.getElementById('filterSubject').value;const arr=lectures.filter(l=>f==='All'||l.subject===f);document.getElementById('lectureList').innerHTML=arr.length?arr.map(makeCard).join(''):'<div class="empty">No lectures added yet. Use “Add lecture” to add your first video.</div>'}
+function renderBacklog(){const today=new Date().toISOString().slice(0,10);const arr=lectures.filter(l=>!l.done&&l.scheduledDate&&l.scheduledDate<today);document.getElementById('backlogList').innerHTML=arr.length?arr.map(makeCard).join(''):'<div class="empty">No overdue scheduled lectures. Add a scheduled date to track backlog.</div>'}
+function toggleDone(id){const l=lectures.find(x=>x.id===id);if(l){l.done=!l.done;save();renderLibrary();renderBacklog()}}
+function removeLecture(id){if(confirm('Delete this lecture from this browser?')){lectures=lectures.filter(x=>x.id!==id);save();renderLibrary();renderBacklog()}}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function safeUrl(s){return String(s).replace(/['"\\]/g,'')}
+function refresh(){document.getElementById('totalLectures').textContent=lectures.length;document.getElementById('completedLectures').textContent=lectures.filter(x=>x.done).length;document.getElementById('pendingLectures').textContent=lectures.filter(x=>!x.done).length;const today=new Date().toISOString().slice(0,10);document.getElementById('backlogCount').textContent=lectures.filter(x=>!x.done&&x.scheduledDate&&x.scheduledDate<today).length;const day=new Date().getDay();document.getElementById('todayPlan').innerHTML=rotation[day].map(s=>`<p style="margin:7px 0"><b>${s}</b> — target 2 lectures</p>`).join('')}
+const deadline=new Date('2027-02-01T00:00:00');const days=Math.ceil((deadline-new Date())/86400000);document.getElementById('daysLeft').textContent=days>=0?days+' days remaining':'Deadline passed';
+refresh();
+</script>
+</body></html>
